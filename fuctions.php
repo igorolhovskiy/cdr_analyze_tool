@@ -74,7 +74,11 @@ Class DatabaseOps {
             die('Error in statement ' . $sql . '  ' . $db_conn->error);
         }
         if (substr($sql, 0, 6) === "SELECT" || substr($sql, 0, 8) === "DESCRIBE") {
-            return $db_res->fetch_all();
+            if (method_exists('mysqli_result', 'fetch_all')) {
+                return $db_res->fetch_all(MYSQLI_ASSOC);
+            }
+            for ($res = array(); $tmp = $db_res->fetch_array(MYSQLI_ASSOC);) $res[] = $tmp;
+            return $res;
         } 
         return True;
 
