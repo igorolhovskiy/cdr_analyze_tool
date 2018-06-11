@@ -9,15 +9,6 @@ class mysqlix extends mysqli {
         }
 
     }
-    public function fetch_all($resulttype = MYSQLI_NUM)
-        {
-            if (method_exists('mysqli_result', 'fetch_all')) # Compatibility layer with PHP < 5.3
-                $res = parent::fetch_all($resulttype);
-            else
-                for ($res = array(); $tmp = $this->fetch_array($resulttype);) $res[] = $tmp;
-
-            return $res;
-        }
 }
 
 
