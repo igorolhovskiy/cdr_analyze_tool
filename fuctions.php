@@ -7,7 +7,17 @@ class mysqlix extends mysqli {
         if ($this->connect_error) {
             die('Connect Error to host ' . $host . ': (' . $this->connect_errno . ') ' . $this->connect_error);
         }
+
     }
+    public function fetch_all($resulttype = MYSQLI_NUM)
+        {
+            if (method_exists('mysqli_result', 'fetch_all')) # Compatibility layer with PHP < 5.3
+                $res = parent::fetch_all($resulttype);
+            else
+                for ($res = array(); $tmp = $this->fetch_array($resulttype);) $res[] = $tmp;
+
+            return $res;
+        }
 }
 
 
@@ -21,22 +31,22 @@ Class DatabaseOps {
         if (!$local_config) {
             return False;
         }
-        $db_conn_local = new mysqlix($local_config['host'], $local_config['username'], $local_config['password'], $local_config['database']);
+        $this->db_conn_local = new mysqlix($local_config['host'], $local_config['username'], $local_config['password'], $local_config['database']);
 
         // Do astpp connection
         if ($astpp_config) {
-            $db_conn_astpp = new mysqlix($astpp_config['host'], $astpp_config['username'], $astpp_config['password'], $astpp_config['database']);
+            $this->db_conn_astpp = new mysqlix($astpp_config['host'], $astpp_config['username'], $astpp_config['password'], $astpp_config['database']);
         } else {
-            $db_conn_astpp = False;
+            $this->db_conn_astpp = False;
         }
     }
 
     function sync_databases() {
-        if (!$db_conn_astpp) {
+        if (!$this->db_conn_astpp) {
             return False;
         }
 
-        foreach ($sync_tables as $table) {
+        foreach ($this->sync_tables as $table) {
             // First - get database description
             $fields_data = $this->exec_query_astpp("DESCRIBE ".$table);
             $sql_create = "CREATE TABLE " . $table . " (";
@@ -53,19 +63,19 @@ Class DatabaseOps {
     }
 
     function exec_query_local($sql) {
-        return exec_query($sql, True);
+        return $this->exec_query($sql, True);
     }
 
     function exec_query_astpp($sql) {
-        return exec_query($sql, False);
+        return $this->exec_query($sql, False);
     }
 
     function exec_query($sql, $is_local = True) {
-        if (!($is_local && $db_conn_astpp)) {
+        if (!($is_local && $this->db_conn_astpp)) {
             return False;
         }
 
-        $db_conn = $is_local ? $db_conn_local : $db_conn_astpp;
+        $db_conn = $is_local ? $this->db_conn_local : $this->db_conn_astpp;
         
         $db_res = $db_conn->query($sql);
 
@@ -73,7 +83,7 @@ Class DatabaseOps {
             die('Error in statement ' . $sql . '  ' . $db_conn->error);
         }
         if (substr($sql, 0, 6) === "SELECT" || substr($sql, 0, 8) === "DESCRIBE") {
-            return $db_res->fetch_all(MYSQLI_ASSOC);
+            return $db_res->fetch_all();
         } 
         return True;
 
