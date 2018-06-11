@@ -9,6 +9,17 @@ class mysqlix extends mysqli {
         }
 
     }
+
+    public function insert_array($insData, $table) {
+        $prep = array();
+        foreach($insData as $k => $v ) {
+            $prep[$k] = "'" . $v . "'";
+        }
+        $sql = "INSERT INTO $table ( " . implode(', ',array_keys($insData)) . ") VALUES (" . implode(', ',array_values($prep)) . ")";
+        if (!$this->query($sql)) {
+            die('Error in statement ' . $sql . " \n " . $this->error);
+        }
+    }
 }
 
 
@@ -39,13 +50,19 @@ Class DatabaseOps {
 
         foreach ($this->sync_tables as $table) {
             // First - get database description
-            $fields_data = $this->exec_query_astpp("DESCRIBE ".$table);
-            $sql_create = "CREATE TABLE " . $table . " (";
-            foreach ($fields_data  as $key => $value) {
-               print('Key: ' . $key . ' Value: ' . $value);
-            }
+            $fields_data = $this->exec_query_astpp("SHOW CREATE TABLE ".$table);
+
+            $sql = $fields_data[0]['Create Table'];
+            $sql = str_replace("\n", '', $sql);
             // Create local table
             $this->exec_query_local("DROP TABLE IF EXISTS " . $table);
+            $this->exec_query_local($sql);
+
+            // Copy data from astpp table to local
+            $table_data = $this->exec_query_astpp("SELECT * FROM $table");
+            foreach ($table_data as $row) {
+                $this->db_conn_local->insert_array($row, $table);   
+            }
         }
     }
 
@@ -62,7 +79,7 @@ Class DatabaseOps {
     }
 
     function exec_query($sql, $is_local = True) {
-        if (!($is_local && $this->db_conn_astpp)) {
+        if (!$is_local && !$this->db_conn_astpp) {
             return False;
         }
 
@@ -71,14 +88,14 @@ Class DatabaseOps {
         $db_res = $db_conn->query($sql);
 
         if (!$db_res) {
-            die('Error in statement ' . $sql . '  ' . $db_conn->error);
+            die('Error in statement ' . $sql . " \n " . $db_conn->error);
         }
-        if (substr($sql, 0, 6) === "SELECT" || substr($sql, 0, 8) === "DESCRIBE") {
-            if (method_exists('mysqli_result', 'fetch_all')) {
-                return $db_res->fetch_all(MYSQLI_ASSOC);
+        if (substr($sql, 0, 6) === "SELECT" || substr($sql, 0, 4) === "SHOW") {
+            $result = array();
+            while ($row = $db_res->fetch_array(MYSQLI_ASSOC)) {
+                $result[] = $row;
             }
-            for ($res = array(); $tmp = $db_res->fetch_array(MYSQLI_ASSOC);) $res[] = $tmp;
-            return $res;
+            return $result;
         } 
         return True;
 
@@ -88,7 +105,7 @@ Class DatabaseOps {
 Class RateMachine {
 
     public function __construct($database_ops) {
-
+        
     }
 }
 ?>
