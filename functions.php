@@ -173,8 +173,6 @@ Class RateMachine {
         // Form SQL request
         $sql = "(" . $field_name . " = '^ " . $number . ".*'";
 
-        print(strlen($number)."\n");
-
         for ($i = strlen($number) - 1; $i >= 1; $i--) {
             $sql .= " OR $field_name = '^" . substr($number, 0, $i) . ".*'";
         }
@@ -186,7 +184,7 @@ Class RateMachine {
 
         // SELECT * FROM routes WHERE number_loop(number, pattern) AND status = 0 AND pricelist_id = 6  ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1
         $sql = "SELECT * FROM routes WHERE " . $this->number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
-        $rate_line = $this->database_ops->exec_query_local($sql);
+        $rate_line = $this->database_ops->exec_query_local($sql)[0];
         if (!$rate_line) {
             die("Cannon run sql: $sql\n");
         }
@@ -208,7 +206,7 @@ Class RateMachine {
 
         $sql = "SELECT * FROM outbound_routes WHERE " . $this->number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
 
-        $rate_line = $this->database_ops->exec_query_local($sql);
+        $rate_line = $this->database_ops->exec_query_local($sql)[0];
         if (!$rate_line) {
             return [False, False];
         }
