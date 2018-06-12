@@ -83,7 +83,7 @@ Class DatabaseOps {
         $sql = "DROP TABLE IF EXISTS cdr";
         $this->exec_query_local($sql);
 
-        $sql = "CREATE TABLE cdr (number VARCHAR, duration VARCHAR)";
+        $sql = "CREATE TABLE cdr (number VARCHAR(255), duration VARCHAR(255))";
         $this->exec_query_local($sql);
 
         foreach ($csv_object as $cdr_line) {
