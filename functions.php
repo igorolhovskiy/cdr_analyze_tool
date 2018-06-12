@@ -180,11 +180,9 @@ Class RateMachine {
         return $sql;      
     }
 
-    private function get_info_local($cdr_line, $pricelist_id, $round_digits = 2) {
+    private function get_info($sql, $cdr_line, $round_digits) {
 
-        // SELECT * FROM routes WHERE number_loop(number, pattern) AND status = 0 AND pricelist_id = 6  ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1
-        $sql = "SELECT * FROM routes WHERE " . $this->number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
-        $rate_line = $this->database_ops->exec_query_local($sql)[0];
+        $rate_line = $this->database_ops->exec_query_local($sql);
         if (!$rate_line) {
             die("Cannon run sql: $sql\n");
         }
@@ -192,6 +190,7 @@ Class RateMachine {
         if ($rate_line == -1) {
             return ['undefined', 0];
         }
+        $rate_line = $rate_line[0];
 
         $call_time = $this->get_correct_time($cdr_line['duration'], $rate_line['init_inc'], $rate_line['inc']);
 
@@ -199,28 +198,22 @@ Class RateMachine {
         
         return [$rate_line['comment'], $call_price];
 
-        // Return destination and price
     }
+
+    private function get_info_local($cdr_line, $pricelist_id, $round_digits = 2) {
+
+        // SELECT * FROM routes WHERE number_loop(number, pattern) AND status = 0 AND pricelist_id = 6  ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1
+        $sql = "SELECT * FROM routes WHERE " . $this->number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
+
+        return $this->get_info($sql, $cdr_line, $round_digits);
+    }
+
 
     private function get_info_outbound($cdr_line, $pricelist_id, $round_digits = 2) {
 
         $sql = "SELECT * FROM outbound_routes WHERE " . $this->number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
-
-        $rate_line = $this->database_ops->exec_query_local($sql)[0];
-        if (!$rate_line) {
-            return [False, False];
-        }
-
-        if ($rate_line == -1) {
-            return ['undefined', 0];
-        }
-
-        $call_time = $this->get_correct_time($cdr_line['duration'], $rate_line['init_inc'], $rate_line['inc']);
-
-        $call_price = round((float) $call_time * (float) $rate_line['cost'], $round_digits);
         
-        return [$rate_line['comment'], $call_price];
-        // Return destination and price
+        return $this->get_info($sql, $cdr_line, $round_digits);
     }
 
     public function process_cdr($options) {
