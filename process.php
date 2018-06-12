@@ -8,7 +8,7 @@ $csv_object[] = array('number' => 380919082171, 'duration' => 62);
 $csv_object[] = array('number' => 380919082171, 'duration' => 15);
 $csv_object[] = array('number' => 445577880087, 'duration' => 62);
 $process_cdr_options = array(
-    'local' => 9,
+    'local' => 3,
     'outbound' => 3,
     'is_detailed' => True
 );
