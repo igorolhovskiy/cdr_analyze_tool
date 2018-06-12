@@ -194,7 +194,7 @@ Class RateMachine {
 
         $call_time = $this->get_correct_time($cdr_line['duration'], $rate_line['init_inc'], $rate_line['inc']);
 
-        $call_price = round((float) $call_time * (float) $rate_line['cost'], $round_digits);
+        $call_price = round(((float) $call_time /  60.0) * (float) $rate_line['cost'], $round_digits);
         
         return [$rate_line['comment'], $call_price];
 
