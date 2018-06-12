@@ -212,7 +212,7 @@ Class RateMachine {
     private function get_info_outbound($cdr_line, $pricelist_id, $round_digits = 2) {
 
         $sql = "SELECT * FROM outbound_routes WHERE " . $this->number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
-        
+
         return $this->get_info($sql, $cdr_line, $round_digits);
     }
 
@@ -273,7 +273,7 @@ Class RateMachine {
             }
         } // Foreach end
         
-        return [$local_detail_data, $outbound_detail_data];
+        return array('local' => $local_detail_data, 'outbound' => $outbound_detail_data);
 
     }
 }
