@@ -258,7 +258,7 @@ Class RateMachine {
 
         foreach ($cdr_data as $cdr_line) {
             if ($local_id) {
-                list($destination, $call_cost) = get_info_local($cdr_line, $local_id);
+                list($destination, $call_cost) = $this->get_info_local($cdr_line, $local_id);
                 $local_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $local_detail_data)) {
@@ -269,7 +269,7 @@ Class RateMachine {
                 }
             }
             if ($outbound_id) {
-                list($destination, $call_cost) = get_info_outbound($cdr_line, $outbound_id);
+                list($destination, $call_cost) = $this->get_info_outbound($cdr_line, $outbound_id);
                 $outbound_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $outbound_detail_data)) {

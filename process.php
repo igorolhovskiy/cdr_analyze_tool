@@ -18,7 +18,7 @@ $db_ops->import_cdr($csv_object);
 
 $rm = new RateMachine($db_ops);
 
-$res = $rm->process_cdr();
+$res = $rm->process_cdr($process_cdr_options);
 
 var_dump($res);
 
