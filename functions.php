@@ -185,8 +185,8 @@ Class RateMachine {
     private function get_info_local($cdr_line, $pricelist_id, $round_digits = 2) {
 
         // SELECT * FROM routes WHERE number_loop(number, pattern) AND status = 0 AND pricelist_id = 6  ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1
-        $sql = "SELECT * FROM routes WHERE " . number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
-        $rate_line = $database_ops->exec_query_local($sql);
+        $sql = "SELECT * FROM routes WHERE " . $this->number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
+        $rate_line = $this->database_ops->exec_query_local($sql);
         if (!$rate_line) {
             die("Cannon run sql: $sql\n");
         }
@@ -206,9 +206,9 @@ Class RateMachine {
 
     private function get_info_outbound($cdr_line, $pricelist_id, $round_digits = 2) {
 
-        $sql = "SELECT * FROM outbound_routes WHERE " . number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
+        $sql = "SELECT * FROM outbound_routes WHERE " . $this->number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
 
-        $rate_line = $database_ops->exec_query_local($sql);
+        $rate_line = $this->database_ops->exec_query_local($sql);
         if (!$rate_line) {
             return [False, False];
         }
