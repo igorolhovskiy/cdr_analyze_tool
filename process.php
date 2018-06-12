@@ -10,7 +10,8 @@ $csv_object[] = array('number' => 445577880087, 'duration' => 62);
 $process_cdr_options = array(
     'local' => 3,
     'outbound' => 3,
-    'is_detailed' => True
+    'is_detailed' => True,
+    'round_digits' => 5
 );
 
 $db_ops = new DatabaseOps($local_config);

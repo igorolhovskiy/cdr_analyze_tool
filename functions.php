@@ -222,10 +222,13 @@ Class RateMachine {
             'local' => ID of tariff plan - 'routes'. Optional.
             'outbound' => ID of gateway - 'outbound_routes'. Optional
             'is_detailed' => return array with detailed info on destinations. TBD. Optional
+            'round_digits' => round to X digits after dot
         */
         $local_id = isset($options['local']) ? $options['local'] : False;
         $outbound_id = isset($options['outbound']) ? $options['outbound'] : False;
         $is_detailed = isset($options['is_detailed']) ? filter_var($options['is_detailed'], FILTER_VALIDATE_BOOLEAN) : False;
+        $round_digits = isset($options['round_digits']) ? $options['round_digits'] : 2;
+
 
         if (!$local_id && !$outbound_id) {
             return False;
@@ -249,7 +252,7 @@ Class RateMachine {
 
         foreach ($cdr_data as $cdr_line) {
             if ($local_id) {
-                list($destination, $call_cost) = $this->get_info_local($cdr_line, $local_id);
+                list($destination, $call_cost) = $this->get_info_local($cdr_line, $local_id, $round_digits);
                 $local_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $local_detail_data)) {
@@ -260,7 +263,7 @@ Class RateMachine {
                 }
             }
             if ($outbound_id) {
-                list($destination, $call_cost) = $this->get_info_outbound($cdr_line, $outbound_id);
+                list($destination, $call_cost) = $this->get_info_outbound($cdr_line, $outbound_id, $round_digits);
                 $outbound_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $outbound_detail_data)) {
