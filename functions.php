@@ -240,10 +240,10 @@ Class RateMachine {
 
         // Getting local info (pricelist id pricelists table)
         $sql = "SELECT id, name FROM pricelists";
-        $result['local'] = $this->database_ops->exec_query_local($sql)[0];
+        $result['local'] = $this->database_ops->exec_query_local($sql);
 
         $sql = "SELECT id, name FROM gateways";
-        $result['outbound'] = $this->database_ops->exec_query_local($sql)[0];
+        $result['outbound'] = $this->database_ops->exec_query_local($sql);
 
         return $result;
     }
