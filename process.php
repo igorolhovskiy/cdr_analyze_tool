@@ -26,10 +26,12 @@ while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
 }
 fclose($handle);
 
-
+print("Done processing CSV\n");
 
 $db_ops = new DatabaseOps($local_config);
 $db_ops->import_cdr($csv_object);
+
+print("Done importing CSV\n");
 
 $rm = new RateMachine($db_ops);
 
