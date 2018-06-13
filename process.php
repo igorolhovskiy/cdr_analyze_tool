@@ -37,6 +37,6 @@ $rm = new RateMachine($db_ops);
 
 $res = $rm->process_cdr($process_cdr_options);
 
-var_dump($res);
+echo (new ArrayToTextTable($res))->render();
 
 ?>
