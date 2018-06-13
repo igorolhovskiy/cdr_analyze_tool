@@ -3,8 +3,8 @@ require_once "config.php";
 require_once "functions.php";
 
 $process_cdr_options = array(
-    'local' => 3,
-    'outbound' => 3,
+    'local' => 3, // id from drop-down menu
+    'outbound' => 3, // id from drop-down menu
     'is_detailed' => True,
     'round_digits' => 5
 );
