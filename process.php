@@ -18,7 +18,7 @@ $csv_object = array();
 
 while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
     if (count($data) == 2) {
-        $csv_object[] = array('number' => $number_translator->colt($data[0]), 'duration' => $data[1]);
+        $csv_object[] = array('number' => $number_translator->colt_austria($data[0]), 'duration' => $data[1]);
     } else {
         var_dump($data);
         die("Cannot parse line\n");
