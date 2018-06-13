@@ -12,10 +12,14 @@ $process_cdr_options = array(
 $csv_object = (new FileReader())->read_csv_file("COLT_MZ.csv", 'colt_austria');
 print("Done processing CSV\n");
 
-$db_ops = new DatabaseOps($local_config);
+$db_ops = new DatabaseOps($local_config, $astpp_config);
 $db_ops->import_cdr($csv_object);
 
 print("Done importing CSV\n");
+
+$db_ops->sync_databases();
+
+print("Done database sync\n");
 
 $rm = new RateMachine($local_config);
 
