@@ -235,6 +235,19 @@ Class RateMachine {
         return $this->get_info($sql, $cdr_line, $round_digits);
     }
 
+    public function get_rates_info() {
+        $result = array();
+
+        // Getting local info (pricelist id pricelists table)
+        $sql = "SELECT id, name FROM pricelists";
+        $result['local'] = $this->database_ops->exec_query_local($sql)[0];
+
+        $sql = "SELECT id, name FROM gateways";
+        $result['outbound'] = $this->database_ops->exec_query_local($sql)[0];
+
+        return $result;
+    }
+
     public function process_cdr($options) {
         /*
             $options in format

@@ -9,7 +9,7 @@ $process_cdr_options = array(
     'round_digits' => 5
 );
 
-$csv_object = (new FileReader())->read_csv_file("COLT_MZ.csv", 'colt_austria');
+/*$csv_object = (new FileReader())->read_csv_file("COLT_MZ.csv", 'colt_austria');
 print("Done processing CSV\n");
 
 $db_ops = new DatabaseOps($local_config, $astpp_config);
@@ -26,5 +26,10 @@ $rm = new RateMachine($local_config);
 $res = $rm->process_cdr($process_cdr_options);
 
 var_dump($res);
+*/
+$rm = new RateMachine($local_config);
+
+var_dump($rm->get_rates_info());
+
 
 ?>
