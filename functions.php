@@ -258,8 +258,8 @@ Class RateMachine {
         */
         $local_id = isset($options['local']) ? $options['local'] : False;
         $outbound_id = isset($options['outbound']) ? $options['outbound'] : False;
-        $is_detailed = isset($options['is_detailed']) ? filter_var($options['is_detailed'], FILTER_VALIDATE_BOOLEAN) : False;
-        $round_digits = isset($options['round_digits']) ? $options['round_digits'] : 2;
+        $is_detailed = isset($options['is_detailed']) ? filter_var($options['is_detailed'], FILTER_VALIDATE_BOOLEAN) : True;
+        $round_digits = isset($options['round_digits']) ? $options['round_digits'] : 5;
 
 
         if (!$local_id && !$outbound_id) {
