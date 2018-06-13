@@ -1,25 +1,29 @@
 <?php
 
-function get_correct_time($time, $init_inc = 1, $inc = 1) {
+function format_number_colt($number) {
 
-    if ($time <= 0) {
-        return 0;
+    $national_pattern = "/^0([1-9].*)$/";
+    $international_pattern = "/^00([1-9].*)$/";
+
+    if (preg_match($national_pattern, $number, $matches)) {
+        return "41" . $matches[1];
+    } elseif (preg_match($international_pattern, $number, $matches)) {
+        return $matches[1];
     }
-
-    if ($time <= $init_inc) {
-        return $init_inc;
-    }
-
-    $time_corrected = $time - $init_inc;
-    $extra_add = ($time_corrected % $inc == 0) ? 0 : 1;
-    
-    $time_corrected = $init_inc + (floor($time_corrected / $inc) + $extra_add) * $inc;
-    return $time_corrected;
+    return $number;
 }
 
-$time = 25;
-$init_inc = 30;
-$inc = 1;
+if (($handle = fopen("COLT_MZ.csv", "r")) === FALSE) {
+    die("Cannot open file\n");
+}
+while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
+    if (count($data) == 2) {
+        print("Number: " . format_number_colt($data[0]) . " Duration: " . $data[1] . "\n");
+    } else {
+        var_dump($data);
+        die("Cannot parse line\n");
+    }
+}
+fclose($handle);
 
-print(get_correct_time($time, $init_inc, $inc). "\n");
 ?>

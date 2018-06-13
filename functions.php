@@ -280,4 +280,18 @@ Class RateMachine {
 
     }
 }
+
+class NumberTranslation {
+    public function colt($number) {
+        $national_pattern = "/^0([1-9].*)$/";
+        $international_pattern = "/^00([1-9].*)$/";
+
+        if (preg_match($national_pattern, $number, $matches)) {
+            return "41" . $matches[1];
+        } elseif (preg_match($international_pattern, $number, $matches)) {
+            return $matches[1];
+        }
+        return $number;
+    }
+}
 ?>
