@@ -207,7 +207,7 @@ Class RateMachine {
         }
 
         if ($rate_line == -1) {
-            return ['undefined', 0];
+            return ['undefined', 1];
         }
         $rate_line = $rate_line[0];
 
