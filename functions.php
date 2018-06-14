@@ -288,7 +288,7 @@ Class RateMachine {
                 $local_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $local_detail_data)) {
-                        $local_detail_data[$destination] += $call_cost;
+                        $local_detail_data[$destination] = (float) round($call_cost + $local_detail_data[$destination], $round_digits);
                     } else {
                         $local_detail_data[$destination] = $call_cost;
                     }
@@ -299,7 +299,7 @@ Class RateMachine {
                 $outbound_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $outbound_detail_data)) {
-                        $outbound_detail_data[$destination] += $call_cost;
+                        $outbound_detail_data[$destination] = (float) round($call_cost + $outbound_detail_data[$destination], $round_digits);
                     } else {
                         $outbound_detail_data[$destination] = $call_cost;
                     }
