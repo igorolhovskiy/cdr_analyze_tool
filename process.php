@@ -2,34 +2,76 @@
 require_once "config.php";
 require_once "functions.php";
 
-$process_cdr_options = array(
-    'local' => 3, // id from drop-down menu
-    'outbound' => 3, // id from drop-down menu
-    'is_detailed' => True,
-    'round_digits' => 5
-);
+define('WORK_MODE', 'mock'); // 'mock' or 'live'
 
-// Upload CSV
+if (WORK_MODE === 'mock') {
+  require_once "mockdata.php";
+}
 
-$csv_object = (new FileReader())->read_csv_file("COLT_MZ.csv", 'colt_austria');
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+  $action = $_GET['action'];
+  if ($action === 'menu_info') {
+    if (WORK_MODE === 'live') {
+      $rm = new RateMachine($local_config);
+      $menu_info = $rm->get_rates_info();    
+    }
+    header('Content-Type: application/json');
+    echo json_encode($menu_info);
+  }
 
-$db_ops = new DatabaseOps($local_config);
-$db_ops->import_cdr($csv_object);
+} else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (isset($_FILES['csvfile'])) { // Upload CSV
+    $csv_file = basename($_FILES['csvfile']['name']);    
+    if ( move_uploaded_file($_FILES['csvfile']['tmp_name'], $csv_file)) {
+      // Upload CSV
+      if (WORK_MODE === 'live') {
+        $csv_object = (new FileReader())->read_csv_file($csv_file, 'colt_austria');
 
-// End Upload CSV
+        $db_ops = new DatabaseOps($local_config);
+        $db_ops->import_cdr($csv_object);
+      } else {
+        sleep(5);
+      }
+      // End Upload CSV      
+    }
+    echo "OK";
+  } else if ($_POST['action'] === 'process') {
+    $local = $_POST['local'];
+    $outbound = $_POST['outbound'];
+    if (WORK_MODE === 'live') {
+      $process_cdr_options = array(
+          'local' => $local, // id from drop-down menu
+          'outbound' => $outbound, // id from drop-down menu
+          'is_detailed' => True,
+          'round_digits' => 5
+      );
+      // Process CDR
+      $rm = new RateMachine($local_config);
 
-// Sync databases
-$db_ops = new DatabaseOps($local_config, $astpp_config);
+      $process_data = $rm->process_cdr($process_cdr_options);      
+    } else {
+      sleep(5);
+    }
+    header('Content-Type: application/json');
+    echo json_encode($process_data);
 
-$db_ops->sync_databases();
+  } else if ($_POST['action'] === 'sync-databases') {
+    if (WORK_MODE === 'live') {
+      // Sync databases
+      $db_ops = new DatabaseOps($local_config, $astpp_config);
 
-// End Sync Databases
+      $db_ops->sync_databases();
 
-// Process CDR
+      // End Sync Databases
+    } else {
+      sleep(5);
+    }
+    header('Content-Type: application/json');
+    echo json_encode(array('success' => 'true'));
+  }
+}
 
-$rm = new RateMachine($local_config);
-
-$res = $rm->process_cdr($process_cdr_options);
+return true;
 
 /*
 output example
@@ -132,9 +174,6 @@ array(2) {
 
 
 // Get DropDown menu info
-
-$rm = new RateMachine($local_config);
-$menu_info = $rm->get_rates_info();
 
 /*
 output example

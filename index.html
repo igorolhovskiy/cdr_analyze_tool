@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <title>CDR Analyze tools</title>
+</head>
+
+<body style="margin-top: 240px;">
+    <nav class="navbar fixed-top navbar-light bg-light">
+        <div class="container">
+            <div class="row flex-grow-1">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col">
+                            <form class="form-inline" id="uploadForm" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <input type="file" name='csvfile' accept=".csv" class="form-control-file" id="csvFile">
+                                </div>
+                                <button type="button" disabled id="uploadCSV" class="btn btn-outline-primary">Upload CSV File</button>
+                            </form>
+                            <div class="progress mt-1 d-none" id="progress-upload">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">Please wait, loading file...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="localSelector">Local Selector</label>
+                                <select class="form-control" id="localSelector">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="outboundSelector">Outbound Selector</label>
+                                <select class="form-control" id="outboundSelector">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <button type="button" id="process-button" class="btn btn-primary btn-block">Process</button>
+                            <div class="progress mt-1 d-none" id="progress-process">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:90%;" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">Please wait, doing process...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 text-right">
+                    <button type="button" id="sync-database-button" class="btn btn-info">Sync Databases</button>
+                    <div class="progress mt-1 d-none" id="progress-sync">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:90%;" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">Please wait, doing sync databases...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <table class="table" id='localTable'>
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="rowgroup" colspan=2>Local</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-6" id='outboundTable'>
+                <table class="table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="rowgroup" colspan=2>Outbound</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+    <script>
+        $(function() {
+
+            getMenuInfo();
+            $('#csvFile').on('change', function() {
+                if (this.files[0]) {
+                    $('#uploadCSV').removeAttr('disabled');
+                } else {
+                    $('#uploadCSV').attr('disabled', true);
+                }
+            });
+            $('#uploadCSV').click(uploadCSV);
+            $('#process-button').click(runProcess);
+            $('#sync-database-button').click(runSync);
+        });
+
+        function getMenuInfo() {
+            $.getJSON("process.php/?action=menu_info", function(data) {
+                $.each(data.local, function(index, item) {
+                    $('#localSelector').append(
+                        '<option value="' + item.id + '">' + item.name + '</option>'
+                    );
+                });
+                $.each(data.outbound, function(index, item) {
+                    $('#outboundSelector').append(
+                        '<option value="' + item.id + '">' + item.name + '</option>'
+                    );
+                })
+            });
+        }
+
+        function uploadCSV() {
+            $('#uploadCSV').attr('disabled', true);
+            $('#progress-upload').removeClass('d-none');
+            $('#progress-upload .progress-bar').width('0').attr('aria-valuenow', '0');
+            $.ajax({
+                // Your server script to process the upload
+                url: 'process.php',
+                type: 'POST',
+
+                // Form data
+                data: new FormData($('#uploadForm')[0]),
+
+                // Tell jQuery not to process data or worry about content-type
+                // You *must* include these options!
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function() {
+                    $('#uploadCSV').removeAttr('disabled');
+                    $('#progress-upload').addClass('d-none');
+                },
+                error: function(xhr, status, error) {
+                    console.log('error loading file', xhr.responseText);
+                    $('#uploadCSV').removeAttr('disabled');
+                    $('#progress-upload').addClass('d-none');
+                },
+                // Custom XMLHttpRequest
+                xhr: function() {
+                    var myXhr = $.ajaxSettings.xhr();
+                    if (myXhr.upload) {
+                        // For handling the progress of the upload
+                        myXhr.upload.addEventListener('progress', function(e) {
+                            if (e.lengthComputable) {
+                                console.log('progress', e.loaded, e.total)
+                                var progressVal = Math.ceil(e.loaded / e.total * 100);
+                                $('#progress-upload .progress-bar').width(progressVal + '%').attr('aria-valuenow', progressVal);
+                            }
+                        }, false);
+                    }
+                    return myXhr;
+                }
+            });
+        }
+
+        function runProcess() {
+            $('#process-button').attr('disabled', true);
+            $('#progress-process').removeClass('d-none');
+            $.post(
+                "process.php", {
+                    action: 'process',
+                    local: $('#localSelector').val(),
+                    outbound: $('#outboundSelector').val()
+                },
+                function(data) {
+                    $('#process-button').removeAttr('disabled');
+                    $('#progress-process').addClass('d-none');
+                    console.log('data:', data);
+                    loadTable('localTable', data.local);
+                    loadTable('outboundTable', data.outbound);
+                }
+            );
+        }
+
+        function runSync() {
+            $('#sync-database-button').attr('disabled', true);
+            $('#progress-sync').removeClass('d-none');
+            $.post(
+                "process.php", {
+                    action: 'sync-databases'
+                },
+                function(data) {
+                    $('#sync-database-button').removeAttr('disabled');
+                    $('#progress-sync').addClass('d-none');
+                    console.log('data:', data);
+                }
+            );
+        }
+
+        function loadTable(tableId, data) {
+            var tbody = $('#' + tableId + ' tbody');
+            var tfoot = $('#' + tableId + ' tfoot');
+            tbody.empty();
+            tfoot.empty();
+            $.each(data, function(key, item) {
+                if (key === 'total') {
+                    tfoot.append(
+                        '<tr class="table-dark"><th scope="row">' + key + '</th><td>' + item + '</td></tr>'
+                    );
+                } else {
+                    tbody.append(
+                        '<tr><td>' + key + '</td><td>' + item + '</td></tr>'
+                    );
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
