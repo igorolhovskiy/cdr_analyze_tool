@@ -50,7 +50,7 @@ class FileReader {
 Class DatabaseOps {
     private $db_conn_astpp;
     private $db_conn_local;
-    private $sync_tables = ['gateways', 'pricelists', 'outbound_routes', 'routes'];
+    private $sync_tables = ['trunks', 'pricelists', 'outbound_routes', 'routes'];
 
     public function __construct($local_config = false, $astpp_config = false) {
         // Do local connection
@@ -242,7 +242,7 @@ Class RateMachine {
         $sql = "SELECT id, name FROM pricelists";
         $result['local'] = $this->database_ops->exec_query_local($sql);
 
-        $sql = "SELECT id, name FROM gateways";
+        $sql = "SELECT id, name FROM trunks";
         $result['outbound'] = $this->database_ops->exec_query_local($sql);
 
         return $result;
@@ -252,7 +252,7 @@ Class RateMachine {
         /*
             $options in format
             'local' => ID of tariff plan - 'routes'. Optional.
-            'outbound' => ID of gateway - 'outbound_routes'. Optional
+            'outbound' => ID of trunk - 'outbound_routes'. Optional
             'is_detailed' => return array with detailed info on destinations. TBD. Optional
             'round_digits' => round to X digits after dot
         */
