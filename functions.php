@@ -222,7 +222,7 @@ Class RateMachine {
     private function get_info_local($cdr_line, $pricelist_id, $round_digits = 2) {
 
         // SELECT * FROM routes WHERE number_loop(number, pattern) AND status = 0 AND pricelist_id = 6  ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1
-        $sql = "SELECT * FROM routes WHERE " . $this->number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
+        $sql = "SELECT * FROM routes WHERE " . $this->number_loop($cdr_line['number']) . " AND pricelist_id = " . $pricelist_id . " AND status = 0 ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
 
         return $this->get_info($sql, $cdr_line, $round_digits);
     }
@@ -230,7 +230,7 @@ Class RateMachine {
 
     private function get_info_outbound($cdr_line, $pricelist_id, $round_digits = 2) {
 
-        $sql = "SELECT * FROM outbound_routes WHERE " . $this->number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
+        $sql = "SELECT * FROM outbound_routes WHERE " . $this->number_loop($cdr_line['number']) . " AND trunk_id = " . $pricelist_id . " AND status = 0 ORDER BY LENGTH(pattern) DESC,cost DESC LIMIT 1";
 
         return $this->get_info($sql, $cdr_line, $round_digits);
     }
@@ -239,10 +239,10 @@ Class RateMachine {
         $result = array();
 
         // Getting local info (pricelist id pricelists table)
-        $sql = "SELECT id, name FROM pricelists";
+        $sql = "SELECT id, name FROM pricelists WHERE status = 0";
         $result['local'] = $this->database_ops->exec_query_local($sql);
 
-        $sql = "SELECT id, name FROM trunks";
+        $sql = "SELECT id, name FROM trunks WHERE status = 0";
         $result['outbound'] = $this->database_ops->exec_query_local($sql);
 
         return $result;

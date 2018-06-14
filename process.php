@@ -2,7 +2,7 @@
 require_once "config.php";
 require_once "functions.php";
 
-define('WORK_MODE', 'mock'); // 'mock' or 'live'
+define('WORK_MODE', 'live'); // 'mock' or 'live'
 
 if (WORK_MODE === 'mock') {
   require_once "mockdata.php";
