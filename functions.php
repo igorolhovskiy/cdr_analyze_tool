@@ -207,7 +207,7 @@ Class RateMachine {
         }
 
         if ($rate_line == -1) {
-            return ['undefined', 1];
+            return ['undefined', 0];
         }
         $rate_line = $rate_line[0];
 
@@ -288,9 +288,14 @@ Class RateMachine {
                 $local_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $local_detail_data)) {
-                        $local_detail_data[$destination] = (float) round($call_cost + $local_detail_data[$destination], $round_digits);
+                        $local_detail_data[$destination]['cost'] += $call_cost;
+                        $local_detail_data[$destination]['num_calls'] += 1;
+                        $local_detail_data[$destination]['duration'] += $cdr_line['duration'];
                     } else {
-                        $local_detail_data[$destination] = $call_cost;
+                        $local_detail_data[$destination] = array();
+                        $local_detail_data[$destination]['cost'] = $call_cost;
+                        $local_detail_data[$destination]['num_calls'] = 1;
+                        $local_detail_data[$destination]['duration'] = $cdr_line['duration'];
                     }
                 }
             }
@@ -299,14 +304,31 @@ Class RateMachine {
                 $outbound_detail_data['total'] += (float) $call_cost;
                 if ($is_detailed) {
                     if (array_key_exists($destination, $outbound_detail_data)) {
-                        $outbound_detail_data[$destination] = (float) round($call_cost + $outbound_detail_data[$destination], $round_digits);
+                        $outbound_detail_data[$destination]['cost'] += $call_cost;
+                        $outbound_detail_data[$destination]['num_calls'] += 1;
+                        $outbound_detail_data[$destination]['duration'] += $cdr_line['duration'];
                     } else {
-                        $outbound_detail_data[$destination] = $call_cost;
+                        $outbound_detail_data[$destination] = array();
+                        $outbound_detail_data[$destination]['cost'] = $call_cost;
+                        $outbound_detail_data[$destination]['num_calls'] = 1;
+                        $outbound_detail_data[$destination]['duration'] = $cdr_line['duration'];
                     }
                 }
 
             }
         } // Foreach end
+
+        foreach ($local_detail_data as $k => $v) {
+            if (is_array($v)) {
+                $local_detail_data[$k] = 'Sum: ' . $v['cost'] . ", Dur: " . $v['duration'] . ", NumCalls: " . $v['num_calls'];
+            }
+        }
+
+        foreach ($outbound_detail_data as $k => $v) {
+            if (is_array($v)) {
+                $local_detail_data[$k] = 'Sum: ' . $v['cost'] . ", Dur: " . $v['duration'] . ", NumCalls: " . $v['num_calls'];
+            }
+        }
         
         return array('local' => $local_detail_data, 'outbound' => $outbound_detail_data);
 
