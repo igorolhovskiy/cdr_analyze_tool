@@ -276,16 +276,19 @@ Class RateMachine {
         }
 
         $local_detail_data = array(
-            'total' => 0
+            'total' => array(),
         );
         $outbound_detail_data = array(
-            'total' => 0
+            'total' => array(),
         );
 
         foreach ($cdr_data as $cdr_line) {
             if ($local_id) {
                 list($destination, $call_cost) = $this->get_info_local($cdr_line, $local_id, $round_digits);
-                $local_detail_data['total'] += (float) $call_cost;
+                $local_detail_data['total']['cost'] += $call_cost;
+                $local_detail_data['total']['cost'] += $call_cost;
+                $local_detail_data['total']['num_calls'] += 1;
+                $local_detail_data['total']['duration'] += $cdr_line['duration'];
                 if ($is_detailed) {
                     if (array_key_exists($destination, $local_detail_data)) {
                         $local_detail_data[$destination]['cost'] += $call_cost;
@@ -301,7 +304,10 @@ Class RateMachine {
             }
             if ($outbound_id) {
                 list($destination, $call_cost) = $this->get_info_outbound($cdr_line, $outbound_id, $round_digits);
-                $outbound_detail_data['total'] += (float) $call_cost;
+                $outbound_detail_data['total']['cost'] += $call_cost;
+                $outbound_detail_data['total']['cost'] += $call_cost;
+                $outbound_detail_data['total']['num_calls'] += 1;
+                $outbound_detail_data['total']['duration'] += $cdr_line['duration'];
                 if ($is_detailed) {
                     if (array_key_exists($destination, $outbound_detail_data)) {
                         $outbound_detail_data[$destination]['cost'] += $call_cost;
@@ -320,13 +326,13 @@ Class RateMachine {
 
         foreach ($local_detail_data as $k => $v) {
             if (is_array($v)) {
-                $local_detail_data[$k] = 'Sum: ' . $v['cost'] . ", Dur: " . $v['duration'] . ", NumCalls: " . $v['num_calls'];
+                $local_detail_data[$k] = 'C: ' . round($v['cost'], $round_digits) . ", D: " . gmdate("H:i:s", $v['duration']) . ", #: " . $v['num_calls'];
             }
         }
 
         foreach ($outbound_detail_data as $k => $v) {
             if (is_array($v)) {
-                $local_detail_data[$k] = 'Sum: ' . $v['cost'] . ", Dur: " . $v['duration'] . ", NumCalls: " . $v['num_calls'];
+                $outbound_detail_data[$k] = 'C: ' . round($v['cost'], $round_digits) . ", D: " . gmdate("H:i:s", $v['duration']) . ", #: " . $v['num_calls'];
             }
         }
         
