@@ -17,6 +17,8 @@ class mysqlix extends mysqli {
         }
         $sql = "INSERT INTO $table ( " . implode(', ',array_keys($insData)) . ") VALUES (" . implode(', ',array_values($prep)) . ")";
         if (!$this->query($sql)) {
+            $error_code = 'Error in statement ' . $sql . " \n " . $this->error;
+            var_dump($error_code);
             die('Error in statement ' . $sql . " \n " . $this->error);
         }
     }
@@ -26,6 +28,7 @@ class FileReader {
 
     public function read_csv_file($csv_file, $number_translator_function = False) {
         if (($handle = fopen($csv_file, "r")) === FALSE) {
+            var_dump("Cannot open ".$csv_file);
             die("Cannot open file\n");
         }
 
@@ -142,6 +145,8 @@ Class DatabaseOps {
         $db_res = $db_conn->query($sql);
 
         if (!$db_res) {
+            $error_code = 'Error in statement ' . $sql . " \n " . $db_conn->error;
+            var_dump($error_code);
             die('Error in statement ' . $sql . " \n " . $db_conn->error);
         }
 
@@ -203,6 +208,8 @@ Class RateMachine {
 
         $rate_line = $this->database_ops->exec_query_local($sql);
         if (!$rate_line) {
+            $error_code = "Cannon run sql: $sql\n";
+            var_dump($error_code);
             die("Cannon run sql: $sql\n");
         }
 
@@ -276,16 +283,23 @@ Class RateMachine {
         }
 
         $local_detail_data = array(
-            'total' => array(),
+            'total' => array(
+                'cost' => 0,
+                'num_calls' => 0,
+                'duration' => 0
+            ),
         );
         $outbound_detail_data = array(
-            'total' => array(),
+            'total' => array(
+                'cost' => 0,
+                'num_calls' => 0,
+                'duration' => 0
+            ),
         );
 
         foreach ($cdr_data as $cdr_line) {
             if ($local_id) {
                 list($destination, $call_cost) = $this->get_info_local($cdr_line, $local_id, $round_digits);
-                $local_detail_data['total']['cost'] += $call_cost;
                 $local_detail_data['total']['cost'] += $call_cost;
                 $local_detail_data['total']['num_calls'] += 1;
                 $local_detail_data['total']['duration'] += $cdr_line['duration'];
@@ -304,7 +318,6 @@ Class RateMachine {
             }
             if ($outbound_id) {
                 list($destination, $call_cost) = $this->get_info_outbound($cdr_line, $outbound_id, $round_digits);
-                $outbound_detail_data['total']['cost'] += $call_cost;
                 $outbound_detail_data['total']['cost'] += $call_cost;
                 $outbound_detail_data['total']['num_calls'] += 1;
                 $outbound_detail_data['total']['duration'] += $cdr_line['duration'];
