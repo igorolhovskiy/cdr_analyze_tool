@@ -225,11 +225,11 @@ Class RateMachine {
 
         $call_price = round(((float) $call_time /  60.0) * (float) $rate_line['cost'], $round_digits);
         
-        if (strlen($rate_line['comment']) > 0) {
-            return [$rate_line['comment'], $call_price];
-        }
+        $pattern = substr($rate_line['pattern'], 1);
+        $pattern = substr($pattern, 0, -2);
 
-        return [$rate_line['pattern'], $call_price];
+
+        return [$rate_line['comment']." (".$pattern.")", $call_price];
     }
 
     private function get_info_local($cdr_line, $pricelist_id, $round_digits = 2) {
