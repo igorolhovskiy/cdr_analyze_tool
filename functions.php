@@ -8,6 +8,9 @@ class mysqlix extends mysqli {
             die('Connect Error to host ' . $host . ': (' . $this->connect_errno . ') ' . $this->connect_error);
         }
 
+        $this->query("SET CHARACTER SET utf8");
+        $this->query("SET NAMES utf8");
+
     }
 
     public function insert_array($insData, $table) {
@@ -222,8 +225,11 @@ Class RateMachine {
 
         $call_price = round(((float) $call_time /  60.0) * (float) $rate_line['cost'], $round_digits);
         
-        return [$rate_line['comment'], $call_price];
+        if (strlen($rate_line['comment']) > 0) {
+            return [$rate_line['comment'], $call_price];
+        }
 
+        return [$rate_line['pattern'], $call_price];
     }
 
     private function get_info_local($cdr_line, $pricelist_id, $round_digits = 2) {
